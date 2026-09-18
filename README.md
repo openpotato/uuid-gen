@@ -7,7 +7,7 @@ UUIDs are generated locally using cryptographically secure random bytes. No gene
 ## Features
 
 + UUID version 4 — random UUIDs
-+ UUID version 7 — Unix timestamp-based, time-ordered UUIDs
++ UUID version 7 — Unix timestamp-based, time-sortable UUIDs
 + Generate between 1 and 1,000 UUIDs at once
 + New-line, comma or space separators
 + Optional hyphens
@@ -17,7 +17,6 @@ UUIDs are generated locally using cryptographically secure random bytes. No gene
 + Copy all generated UUIDs
 + `Ctrl+Enter` / `Cmd+Enter` keyboard shortcut for generation
 + Cryptographically secure randomness with the Web Crypto API
-+ Automatic light and dark mode
 + Responsive layout
 + No dependencies
 + No build step
