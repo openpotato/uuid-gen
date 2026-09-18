@@ -1,0 +1,600 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#6d4aff" />
+  <meta name="description" content="A small, dependency-free UUID generator for creating UUID version 4 and version 7 values directly in your browser." />
+  <meta name="author" content="STÜBER SYSTEMS GmbH" />
+  <meta name="application-name" content="AI Image Transparency Tool" />
+  <link rel="canonical" href="https://openpotato.github.io/uuid-gen/" />
+  <link rel="license" href="https://github.com/openpotato/uuid-gen/blob/main/LICENSE" />
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="OpenPotato" />
+  <meta property="og:title" content="UUID Generator" />
+  <meta property="og:description" content="A simple tool for generating UUIDs directly in your browser." />
+  <meta property="og:url" content="https://openpotato.github.io/uuid-gen/" />
+  <meta property="og:locale" content="en_US" />
+
+  <title>UUID Generator</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #f6f7f9;
+      --surface: #fff;
+      --text: #18181b;
+      --muted: #71717a;
+      --border: #e4e4e7;
+      --primary: #18181b;
+      --primaryText: #fff;
+      --focus: #3b82f6;
+    }
+
+    @media(prefers-color-scheme:dark) {
+      :root {
+        --bg: #111113;
+        --surface: #18181b;
+        --text: #f4f4f5;
+        --muted: #a1a1aa;
+        --border: #3f3f46;
+        --primary: #f4f4f5;
+        --primaryText: #18181b;
+        --focus: #60a5fa
+      }
+    }
+
+    * {
+      box-sizing: border-box
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif
+    }
+
+    main {
+      width: min(760px, calc(100% - 32px));
+      margin: 64px auto
+    }
+
+    header {
+      margin-bottom: 30px
+    }
+
+    h1 {
+      margin: 0 0 7px;
+      font-size: 30px;
+      font-weight: 680;
+      letter-spacing: -.035em
+    }
+
+    h2 {
+      margin: 0 0 16px;
+      font-size: 18px;
+      font-weight: 680;
+      letter-spacing: -.02em
+    }
+
+    .subtitle {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px
+    }
+
+    .panel {
+      padding: 24px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px
+    }
+
+    .panel+.panel {
+      margin-top: 20px
+    }
+
+    .options {
+      display: grid;
+      grid-template-columns: 1.3fr .7fr 1fr;
+      gap: 18px
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 7px
+    }
+
+    label {
+      font-size: 13px;
+      font-weight: 600
+    }
+
+    select,
+    input[type=number] {
+      width: 100%;
+      height: 40px;
+      padding: 0 11px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--surface);
+      color: var(--text);
+      font: inherit;
+      font-size: 14px
+    }
+
+    select:focus,
+    input:focus,
+    textarea:focus,
+    button:focus-visible {
+      outline: 2px solid var(--focus);
+      outline-offset: 2px
+    }
+
+    .format-options {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px 22px;
+      margin-top: 24px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border)
+    }
+
+    .checkbox {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 400
+    }
+
+    .checkbox input {
+      width: 16px;
+      height: 16px;
+      margin: 0;
+      accent-color: var(--primary)
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 24px
+    }
+
+    button {
+      height: 40px;
+      padding: 0 17px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      font: inherit;
+      font-size: 14px;
+      font-weight: 650;
+      cursor: pointer
+    }
+
+    button:hover {
+      filter: brightness(.97)
+    }
+
+    button.primary {
+      border-color: var(--primary);
+      background: var(--primary);
+      color: var(--primaryText)
+    }
+
+    .result {
+      margin-top: 24px
+    }
+
+    .result-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px
+    }
+
+    #status {
+      color: var(--muted);
+      font-size: 12px
+    }
+
+    textarea {
+      display: block;
+      width: 100%;
+      min-height: 120px;
+      resize: vertical;
+      padding: 14px;
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      background: var(--bg);
+      color: var(--text);
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 14px;
+      line-height: 1.6
+    }
+
+    .references {
+      margin: 0;
+      padding-left: 20px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.65
+    }
+
+    .references li+li {
+      margin-top: 8px
+    }
+
+    a {
+      color: var(--text);
+      text-decoration: underline;
+      text-decoration-color: var(--border);
+      text-underline-offset: 3px
+    }
+
+    a:hover {
+      text-decoration-color: var(--text)
+    }
+
+    code {
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: .92em
+    }
+
+    .site-footer {
+      margin-top: 20px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.6;
+      text-align: center
+    }
+
+    .site-footer p {
+      margin: 0
+    }
+
+    .site-footer p+p {
+      margin-top: 1rem
+    }
+
+    @media(max-width:650px) {
+      main {
+        margin: 32px auto
+      }
+
+      .panel {
+        padding: 18px
+      }
+
+      .options {
+        grid-template-columns: 1fr
+      }
+
+      .actions {
+        flex-direction: column
+      }
+
+      button {
+        width: 100%
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main>
+    <header>
+      <h1>UUID Generator</h1>
+      <p class="subtitle">Generate cryptographically random UUID v4 or time-ordered UUID v7 values.</p>
+    </header>
+
+    <section class="panel">
+      <div class="options">
+        <div class="field">
+          <label for="version">Version</label>
+          <select id="version">
+            <option value="4">UUID v4 — Random</option>
+            <option value="7">UUID v7 — Time ordered</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="count">Count</label>
+          <input id="count" type="number" min="1" max="1000" step="1" value="1">
+        </div>
+        <div class="field">
+          <label for="separator">Separator</label>
+          <select id="separator">
+            <option value="newline">New line</option>
+            <option value="comma">Comma</option>
+            <option value="space">Space</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="format-options">
+        <label class="checkbox"><input id="hyphens" type="checkbox" checked>Hyphens</label>
+        <label class="checkbox"><input id="braces" type="checkbox">Braces</label>
+        <label class="checkbox"><input id="uppercase" type="checkbox">Uppercase</label>
+        <label class="checkbox"><input id="urn" type="checkbox">URN</label>
+      </div>
+
+      <div class="actions">
+        <button id="generate" class="primary" type="button">Generate</button>
+        <button id="copy" type="button">Copy</button>
+      </div>
+
+      <div class="result">
+        <div class="result-header"><label for="output">Result</label><span id="status"></span></div>
+        <textarea id="output" readonly spellcheck="false" aria-label="Generated UUIDs"></textarea>
+      </div>
+    </section>
+
+    <section class="panel" aria-labelledby="referencesTitle">
+      <h2 id="referencesTitle">Standards &amp; references</h2>
+      <ul class="references">
+        <li><strong>UUID specification:</strong> RFC 9562 defines UUIDs, their 128-bit format, versions, variants and
+          standard textual representation; it obsoletes RFC 4122 — <a href="https://www.rfc-editor.org/rfc/rfc9562.html"
+            target="_blank" rel="noopener noreferrer">RFC 9562</a>.</li>
+        <li><strong>UUID version 4:</strong> RFC 9562 §5.4 defines UUIDv4 using random or pseudorandom data, with the
+          required version and variant bits — <a href="https://www.rfc-editor.org/rfc/rfc9562.html#section-5.4"
+            target="_blank" rel="noopener noreferrer">RFC 9562 §5.4</a>.</li>
+        <li><strong>UUID version 7:</strong> RFC 9562 §5.7 defines UUIDv7 with a 48-bit Unix timestamp in milliseconds
+          followed by random data and the required version and variant bits — <a
+            href="https://www.rfc-editor.org/rfc/rfc9562.html#section-5.7" target="_blank" rel="noopener noreferrer">RFC
+            9562 §5.7</a>.</li>
+        <li><strong>Text and URN representation:</strong> RFC 9562 §4 defines the canonical hex-and-dash text form and
+          shows the <code>urn:uuid:</code> representation; generic URN syntax is defined by RFC 8141 — <a
+            href="https://www.rfc-editor.org/rfc/rfc9562.html#section-4" target="_blank" rel="noopener noreferrer">RFC
+            9562 §4</a> and <a href="https://www.rfc-editor.org/rfc/rfc8141.html" target="_blank"
+            rel="noopener noreferrer">RFC 8141</a>.</li>
+        <li><strong>Cryptographic randomness:</strong> Random bytes are obtained with the browser's
+          <code>crypto.getRandomValues()</code>, specified by the W3C Web Cryptography API — <a
+            href="https://www.w3.org/TR/WebCryptoAPI/#Crypto-method-getRandomValues" target="_blank"
+            rel="noopener noreferrer">Web Cryptography API</a>.
+        </li>
+        <li><strong>Randomness guidance:</strong> RFC 4086 / BCP 106 provides general guidance for generating
+          security-sensitive random values and is referenced by RFC 9562 for UUID randomness considerations — <a
+            href="https://www.rfc-editor.org/rfc/rfc4086.html" target="_blank" rel="noopener noreferrer">RFC 4086</a>.
+        </li>
+      </ul>
+    </section>
+
+    <footer class="site-footer">
+      <p><strong>Runs locally in your browser. No data is transmitted.</strong></p>
+      <p>Made with ❤️ in Berlin. Source code on <a href="https://github.com/openpotato/uuid-gen">GitHub</a>.</p>
+    </footer>
+  </main>
+
+  <script>
+    "use strict";
+
+    // Short helper for accessing elements by ID.
+    const $ = id => document.getElementById(id);
+
+    // UI elements.
+    const version = $("version");
+    const count = $("count");
+    const separator = $("separator");
+    const hyphens = $("hyphens");
+    const braces = $("braces");
+    const uppercase = $("uppercase");
+    const urn = $("urn");
+    const generateButton = $("generate");
+    const copyButton = $("copy");
+    const output = $("output");
+    const status = $("status");
+
+    /**
+     * Generates a UUID version 4 as 16 random bytes.
+     *
+     * UUIDv4 uses random data except for the version and variant bits,
+     * which are set according to RFC 9562.
+     */
+    function uuidV4() {
+      const bytes = new Uint8Array(16);
+
+      crypto.getRandomValues(bytes);
+
+      // Set version to 4 (0100xxxx).
+      bytes[6] = (bytes[6] & 0x0f) | 0x40;
+
+      // Set the RFC 9562 variant (10xxxxxx).
+      bytes[8] = (bytes[8] & 0x3f) | 0x80;
+
+      return bytes;
+    }
+
+    /**
+     * Generates a UUID version 7 as 16 bytes.
+     *
+     * The first 48 bits contain the current Unix timestamp in
+     * milliseconds. The remaining non-reserved bits are random.
+     */
+    function uuidV7() {
+      const bytes = new Uint8Array(16);
+
+      // Start with cryptographically secure random data.
+      crypto.getRandomValues(bytes);
+
+      // UUIDv7 stores the Unix timestamp in milliseconds
+      // in the first six bytes, most significant byte first.
+      let timestamp = BigInt(Date.now());
+
+      for (let i = 5; i >= 0; i--) {
+        bytes[i] = Number(timestamp & 0xffn);
+        timestamp >>= 8n;
+      }
+
+      // Set version to 7 (0111xxxx).
+      bytes[6] = (bytes[6] & 0x0f) | 0x70;
+
+      // Set the RFC 9562 variant (10xxxxxx).
+      bytes[8] = (bytes[8] & 0x3f) | 0x80;
+
+      return bytes;
+    }
+
+    /**
+     * Converts the 16 UUID bytes into the canonical
+     * 8-4-4-4-12 hexadecimal representation.
+     */
+    function toUuid(bytes) {
+      const hex = Array.from(
+        bytes,
+        byte => byte.toString(16).padStart(2, "0")
+      );
+
+      return [
+        hex.slice(0, 4).join(""),
+        hex.slice(4, 6).join(""),
+        hex.slice(6, 8).join(""),
+        hex.slice(8, 10).join(""),
+        hex.slice(10, 16).join("")
+      ].join("-");
+    }
+
+    /**
+     * Applies the selected presentation options to a UUID string.
+     *
+     * Formatting does not alter the underlying UUID value.
+     */
+    function format(value) {
+      if (!hyphens.checked) {
+        value = value.replaceAll("-", "");
+      }
+
+      if (uppercase.checked) {
+        value = value.toUpperCase();
+      }
+
+      if (braces.checked) {
+        value = `{${value}}`;
+      }
+
+      if (urn.checked) {
+        value = `urn:uuid:${value}`;
+      }
+
+      return value;
+    }
+
+    /**
+     * Returns the separator selected for multiple generated UUIDs.
+     */
+    function getSeparator() {
+      switch (separator.value) {
+        case "comma":
+          return ", ";
+
+        case "space":
+          return " ";
+
+        default:
+          return "\n";
+      }
+    }
+
+    /**
+     * Generates the requested number of UUIDs and writes them
+     * to the output field.
+     */
+    function generate() {
+      let numberOfUuids = parseInt(count.value, 10);
+
+      // Fall back to one UUID for invalid input.
+      if (!Number.isFinite(numberOfUuids)) {
+        numberOfUuids = 1;
+      }
+
+      // Keep the value within the limits defined by the UI.
+      numberOfUuids = Math.max(1, Math.min(numberOfUuids, 1000));
+      count.value = numberOfUuids;
+
+      const values = [];
+
+      for (let i = 0; i < numberOfUuids; i++) {
+        const bytes = version.value === "7"
+          ? uuidV7()
+          : uuidV4();
+
+        const value = format(toUuid(bytes));
+
+        values.push(value);
+      }
+
+      output.value = values.join(getSeparator());
+
+      status.textContent = numberOfUuids === 1
+        ? "1 UUID generated"
+        : `${numberOfUuids} UUIDs generated`;
+    }
+
+    /**
+     * Copies all generated UUIDs to the clipboard.
+     *
+     * navigator.clipboard is preferred. The older selection-based
+     * copy mechanism is kept as a fallback for browsers or contexts
+     * where the Clipboard API is unavailable.
+     */
+    async function copy() {
+      if (!output.value) {
+        return;
+      }
+
+      try {
+        await navigator.clipboard.writeText(output.value);
+      } catch {
+        output.focus();
+        output.select();
+        document.execCommand("copy");
+      }
+
+      copyButton.textContent = "Copied";
+      status.textContent = "Copied to clipboard";
+
+      setTimeout(() => {
+        copyButton.textContent = "Copy";
+      }, 1200);
+    }
+
+    // Braces and the URN representation are mutually exclusive.
+    urn.addEventListener("change", () => {
+      if (urn.checked) {
+        braces.checked = false;
+      }
+    });
+
+    braces.addEventListener("change", () => {
+      if (braces.checked) {
+        urn.checked = false;
+      }
+    });
+
+    // Main actions.
+    generateButton.addEventListener("click", generate);
+    copyButton.addEventListener("click", copy);
+
+    // Ctrl+Enter (Windows/Linux) or Cmd+Enter (macOS) generates UUIDs.
+    document.addEventListener("keydown", event => {
+      if (
+        event.key === "Enter" &&
+        (event.ctrlKey || event.metaKey)
+      ) {
+        event.preventDefault();
+        generate();
+      }
+    });
+
+    // Generate the initial UUID when the page loads.
+    generate();
+  </script>
+</body>
+
+</html>
